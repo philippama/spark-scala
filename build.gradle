@@ -1,0 +1,33 @@
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    scalaVersionMajor = "2"
+    scalaVersionMinor = "11"
+    scalaVersionMicro = "8"
+    scalaVersion = '${scalaVersionMajor}.${scalaVersionMinor}.${scalaVersionMicro}'
+    sparkVersion = '2.2.0'
+}
+
+dependencies {
+    compile(
+            "org.scala-lang:scala-library:${scalaVersion}",
+            "org.scala-lang:scala-reflect:${scalaVersion}",
+            "org.scala-lang:scala-compiler:${scalaVersion}",
+            "org.apache.spark:spark-sql_${scalaVersionMajor}.${scalaVersionMinor}:${sparkVersion}",
+            "org.apache.spark:spark-launcher_${scalaVersionMajor}.${scalaVersionMinor}:${sparkVersion}",
+            "org.apache.spark:spark-core_${scalaVersionMajor}.${scalaVersionMinor}:${sparkVersion}",
+            "com.databricks:spark-avro_${scalaVersionMajor}.${scalaVersionMinor}:4.0.0",
+    )
+    testCompile (
+//            'org.mockito:mockito-all:1.10.19',
+            "org.scalatest:scalatest_${scalaVersionMajor}.${scalaVersionMinor}:3.0.1"
+    )
+}
