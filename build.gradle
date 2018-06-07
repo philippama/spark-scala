@@ -1,6 +1,7 @@
 version '1.0-SNAPSHOT'
 
-apply plugin: 'java'
+//apply plugin: 'java'
+apply plugin: 'scala'
 
 sourceCompatibility = 1.8
 
@@ -25,9 +26,12 @@ dependencies {
             "org.apache.spark:spark-launcher_${scalaVersionMajor}.${scalaVersionMinor}:${sparkVersion}",
             "org.apache.spark:spark-core_${scalaVersionMajor}.${scalaVersionMinor}:${sparkVersion}",
             "com.databricks:spark-avro_${scalaVersionMajor}.${scalaVersionMinor}:4.0.0",
+            'commons-io:commons-io:2.6',
     )
     testCompile (
 //            'org.mockito:mockito-all:1.10.19',
-            "org.scalatest:scalatest_${scalaVersionMajor}.${scalaVersionMinor}:3.0.1"
+            "org.scalatest:scalatest_${scalaVersionMajor}.${scalaVersionMinor}:3.0.1",
+            "com.holdenkarau:spark-testing-base_${scalaVersionMajor}.${scalaVersionMinor}:${sparkVersion}_0.8.0",
+            "org.apache.spark:spark-hive_${scalaVersionMajor}.${scalaVersionMinor}:${sparkVersion}",
     )
 }
