@@ -124,10 +124,11 @@ class ExtractTest extends FunSpec {
     }
   }
 
+  //TODO: refactor out a trait for this - or use SharedSparkContext from spark-testing-base?
   private def localSparkSession: SparkSession = {
     SparkSession
       .builder()
-      .appName("fes-lucene-test")
+      .appName("test")
       .master("local[*]")
       .config("spark.driver.bindAddress", "127.0.0.1")
       .config("spark.driver.host", "localhost")
