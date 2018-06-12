@@ -1,13 +1,13 @@
 package pm.spark.etl.transform
 
-import org.apache.spark.sql.types.{StringType, StructField, StructType}
+import org.apache.spark.sql.types.{DoubleType, StringType, StructField, StructType}
 import org.apache.spark.sql.{Row, SparkSession}
 import org.apache.spark.sql.functions.col
 import org.scalatest.FunSpec
 
 class UserDefinedFunctionsTest extends FunSpec {
 
-  describe("truncatePostcodeUdf") {
+  describe("anonymising postcodes") {
     it("truncates the last character of postcodes") {
 
       // Given
@@ -110,6 +110,70 @@ class UserDefinedFunctionsTest extends FunSpec {
       val expectedDf = spark.createDataFrame(spark.sparkContext.parallelize(expectedRows), testSchema)
 
       assertResult(expectedDf.collect)(actualDf.select("truncatedPostcode").collect)
+    }
+  }
+
+  describe("anonymising coordinates") {
+    it("rounds HALF_UP to 5 decimal places") {
+
+      // Given
+      val spark = localSparkSession
+
+      val testRows = Array(
+        Row(51.4122929339),
+        Row(-0.3075169003)
+      )
+
+      val testSchema = StructType(Seq(
+        StructField("coordinate", DoubleType, nullable = true)
+      ))
+
+      val df = spark.createDataFrame(spark.sparkContext.parallelize(testRows), testSchema)
+
+      // When
+      val actualDf = df
+        .withColumn("truncatedCoordinate", UserDefinedFunctions.anonymiseCoordinate(col("coordinate")))
+
+      // Then
+      val expectedRows = Array(
+        Row(51.41229),
+        Row(-0.30752)
+      )
+
+      val expectedDf = spark.createDataFrame(spark.sparkContext.parallelize(expectedRows), testSchema)
+
+      assertResult(expectedDf.collect)(actualDf.select("truncatedCoordinate").collect)
+    }
+
+    it("handles null coordinates") {
+
+      // Given
+      val spark = localSparkSession
+
+      val testRows = Array(
+        Row(51.41229),
+        Row(null)
+      )
+
+      val testSchema = StructType(Seq(
+        StructField("coordinate", DoubleType, nullable = true)
+      ))
+
+      val df = spark.createDataFrame(spark.sparkContext.parallelize(testRows), testSchema)
+
+      // When
+      val actualDf = df
+        .withColumn("truncatedCoordinate", UserDefinedFunctions.anonymiseCoordinate(col("coordinate")))
+
+      // Then
+      val expectedRows = Array(
+        Row(51.41229),
+        Row(null)
+      )
+
+      val expectedDf = spark.createDataFrame(spark.sparkContext.parallelize(expectedRows), testSchema)
+
+      assertResult(expectedDf.collect)(actualDf.select("truncatedCoordinate").collect)
     }
   }
 
