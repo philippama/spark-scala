@@ -20,7 +20,6 @@ class PlayTest extends FunSpec {
       // When
       val schema: StructType = testDf.schema
 
-
       // Then
 
       spark.stop()
@@ -35,7 +34,6 @@ class PlayTest extends FunSpec {
 
       // When
       val isEmpty = df.rdd.isEmpty
-
 
       // Then
       assertResult(true)(isEmpty)
@@ -55,7 +53,6 @@ class PlayTest extends FunSpec {
           .first()
           .getString(0)
 
-
       // Then
       assertResult("thing-2")(result)
 
@@ -74,7 +71,6 @@ class PlayTest extends FunSpec {
           .first()
           .getString(0)
 
-
       // Then
       assertResult("thing-2")(result)
 
@@ -92,7 +88,6 @@ class PlayTest extends FunSpec {
       val result = testDf.select(columns.head, columns.tail: _*)
       testDf.groupBy("description")
 
-
       // Then
       val actualRows: Array[Row] = result.sort("description").collect
 
@@ -108,30 +103,6 @@ class PlayTest extends FunSpec {
       spark.stop()
     }
 
-    it("finds the maximum of a column") {
-      // Given
-      val spark = localSparkSession
-
-      val testDf: DataFrame = createTestDataFrame(spark)
-      val columns = Array("description", "comment")
-
-      // When
-      val result = testDf.select(columns.head, columns.tail: _*)
-
-      // Then
-      val actualRows: Array[Row] = result.sort("description").collect
-
-      val expectedRows = Array(
-        Row("thing-1", "comment-1"),
-        Row("thing-2", "comment-2"),
-        Row("thing-3", "comment-3"),
-        Row("thing-4", "comment-4"),
-        Row("thing-5", "comment-5")
-      )
-      assertResult(expectedRows)(actualRows)
-
-      spark.stop()
-    }
   }
 
 //TODO : refactor out a trait for this - or use SharedSparkContext from spark-testing-base?
