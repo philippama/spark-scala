@@ -30,7 +30,7 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
       df.withColumn("newColumn", lit("new column"))
     }
 
-    val etlJob:EtlJob = new EtlJob(DefaultAvroReader(spark), DefaultAvroWriter()).withTransformer(withNewColumn())
+    val etlJob:EtlJob = new EtlJob(SimpleAvroReader(spark), SimpleAvroWriter()).withTransformer(withNewColumn())
 
     // When
     etlJob.transform(sourceDir.toString, destDir.toString)
@@ -67,7 +67,7 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
       .mode(SaveMode.Overwrite)
       .save(sourceDir.toString)
 
-    val etlJob:EtlJob = new EtlJob(DefaultAvroReader(spark), DefaultAvroWriter())
+    val etlJob:EtlJob = new EtlJob(SimpleAvroReader(spark), SimpleAvroWriter())
 
     // When
     etlJob.transform(sourceDir.toString, destDir.toString)
@@ -88,6 +88,21 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
     FileUtils.deleteDirectory(testDir.toFile)
 
     spark.stop()
+  }
+
+  it("TODO: has not been done yet") {
+    /*
+    TODO
+    - read with schema
+    - overwrite existing data
+    - Copier?
+    - reads multiple paths? don't think so
+    - Split into
+        DataSetReader that different file formats
+        DataSetWriter that optionally handles re-partitioning etc: DataSetWriter.withPartitionCalculator(...) and different file formats
+        DataSetMover
+     */
+    fail("TODO")
   }
 
   private def createTestDataFrame(spark: SparkSession) = {

@@ -6,14 +6,14 @@ class EtlReader(sparkPathToFrame: (SparkSession, String) => DataFrame, spark: Sp
   def extract(path: String) = sparkPathToFrame(spark, path)
 }
 
-object DefaultAvroReader {
+object SimpleAvroReader {
   private def sparkPathToFrame(spark: SparkSession, path: String) = {
     spark.read.format("com.databricks.spark.avro").load(path)
   }
   def apply(spark: SparkSession): EtlReader = new EtlReader(sparkPathToFrame, spark)
 }
 
-object DefaultJsonReader {
+object SimpleJsonReader {
   private def sparkPathToFrame(spark: SparkSession, path: String) = {
     spark.read.json(path)
   }
