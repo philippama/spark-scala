@@ -90,10 +90,51 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
     spark.stop()
   }
 
+  it("reads an Avro data set with schema") {
+
+    // Given
+    val spark = localSparkSession
+    val testDir = Files.createTempDirectory("testdata")
+    val sourceDir = Files.createDirectory(Paths.get(testDir.toString, "source"))
+    val destDir = Files.createDirectory(Paths.get(testDir.toString, "dest"))
+
+    val testDf: DataFrame = createTestDataFrame(spark)
+    testDf.write
+      .format("com.databricks.spark.avro")
+      .mode(SaveMode.Overwrite)
+      .save(sourceDir.toString)
+
+    val schema = StructType(Seq(
+      StructField("description", StringType, nullable = true),
+      StructField("numThings", IntegerType, nullable = true)
+    ))
+
+    val etlJob:EtlJob = new EtlJob(SimpleAvroReader(spark).withSchema(schema), SimpleAvroWriter())
+
+    // When
+    etlJob.transform(sourceDir.toString, destDir.toString)
+
+    // Then
+    val df = localSparkSession.read.format("com.databricks.spark.avro").load(destDir.toString)
+    val actualRows: Array[Row] = df.sort("description").collect
+
+    val expectedRows = Array(
+      Row("thing-1", 1),
+      Row("thing-2", 2),
+      Row("thing-3", 3),
+      Row("thing-4", 4),
+      Row("thing-5", 5)
+    )
+    assertResult(expectedRows)(actualRows)
+
+    FileUtils.deleteDirectory(testDir.toFile)
+
+    spark.stop()
+  }
+
   it("TODO: has not been done yet") {
     /*
     TODO
-    - read with schema
     - overwrite existing data
     - Copier?
     - reads multiple paths? don't think so
