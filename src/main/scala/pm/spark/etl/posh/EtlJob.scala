@@ -13,10 +13,10 @@ class EtlJob(reader: EtlReader, writer: EtlWriter) {
 
   def identity()(df: DataFrame): DataFrame = df
 
-  def transform(): Unit = {
-    val df = reader.extract
+  def transform(sourcePath: String, destPath: String): Unit = {
+    val df = reader.extract(sourcePath)
       .transform(transformer)
-    writer.load(df)
+    writer.load(df, destPath)
   }
 
   def transformToSameLocation(reader: DataFrameReader, writer: DataFrame => Nothing, transformer: DataFrame => DataFrame = identity()): Unit = {

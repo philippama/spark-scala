@@ -30,12 +30,10 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
       df.withColumn("newColumn", lit("new column"))
     }
 
-    val reader = DefaultAvroReader(spark, sourceDir.toString)
-    val writer = DefaultAvroWriter(destDir.toString)
-    val etlJob:EtlJob = new EtlJob(reader, writer).withTransformer(withNewColumn())
+    val etlJob:EtlJob = new EtlJob(DefaultAvroReader(spark), DefaultAvroWriter()).withTransformer(withNewColumn())
 
     // When
-    etlJob.transform()
+    etlJob.transform(sourceDir.toString, destDir.toString)
 
     // Then
     val df = localSparkSession.read.format("com.databricks.spark.avro").load(destDir.toString)
@@ -69,12 +67,10 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
       .mode(SaveMode.Overwrite)
       .save(sourceDir.toString)
 
-    val reader = DefaultAvroReader(spark, sourceDir.toString)
-    val writer = DefaultAvroWriter(destDir.toString)
-    val etlJob:EtlJob = new EtlJob(reader, writer)
+    val etlJob:EtlJob = new EtlJob(DefaultAvroReader(spark), DefaultAvroWriter())
 
     // When
-    etlJob.transform()
+    etlJob.transform(sourceDir.toString, destDir.toString)
 
     // Then
     val df = localSparkSession.read.format("com.databricks.spark.avro").load(destDir.toString)
