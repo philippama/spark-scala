@@ -135,7 +135,6 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
   it("TODO: has not been done yet") {
     /*
     TODO
-    - overwrite existing data
     - re-partitioner for writer
       - SparkWriter optionally to handle re-partitioning etc: DataSetWriter.withPartitionCalculator(...)
     - Copier?
