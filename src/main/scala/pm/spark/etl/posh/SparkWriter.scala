@@ -2,7 +2,7 @@ package pm.spark.etl.posh
 
 import org.apache.spark.sql.{DataFrame, SaveMode}
 
-class EtlWriter(dataFrameToFile: (DataFrame, String) => Unit) {
+class SparkWriter(dataFrameToFile: (DataFrame, String) => Unit) {
   def load(dataFrame: DataFrame, path: String): Unit = dataFrameToFile(dataFrame, path)
 }
 
@@ -13,7 +13,7 @@ object SimpleAvroWriter {
       .mode(SaveMode.Overwrite)
       .save(path)
   }
-  def apply(): EtlWriter = new EtlWriter(dataFrameToFile)
+  def apply(): SparkWriter = new SparkWriter(dataFrameToFile)
 }
 
 object SimpleParquetWriter {
@@ -22,5 +22,5 @@ object SimpleParquetWriter {
       .mode(SaveMode.Overwrite)
       .parquet(path)
   }
-  def apply(): EtlWriter = new EtlWriter(dataFrameToFile)
+  def apply(): SparkWriter = new SparkWriter(dataFrameToFile)
 }

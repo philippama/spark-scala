@@ -30,10 +30,10 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
       df.withColumn("newColumn", lit("new column"))
     }
 
-    val etlJob:EtlJob = new EtlJob(SimpleAvroReader(spark), SimpleAvroWriter()).withTransformer(withNewColumn())
+    val etlJob:EtlJob = EtlJob(SimpleAvroReader(spark), SimpleAvroWriter()).withTransformer(withNewColumn())
 
     // When
-    etlJob.transform(sourceDir.toString, destDir.toString)
+    etlJob.run(sourceDir.toString, destDir.toString)
 
     // Then
     val df = localSparkSession.read.format("com.databricks.spark.avro").load(destDir.toString)
@@ -61,20 +61,20 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
     val sourceDir = Files.createDirectory(Paths.get(testDir.toString, "source"))
     val destDir = Files.createDirectory(Paths.get(testDir.toString, "dest"))
 
-    val testDf: DataFrame = createTestDataFrame(spark)
+    val testDf = createTestDataFrame(spark)
     testDf.write
       .format("com.databricks.spark.avro")
       .mode(SaveMode.Overwrite)
       .save(sourceDir.toString)
 
-    val etlJob:EtlJob = new EtlJob(SimpleAvroReader(spark), SimpleAvroWriter())
+    val etlJob = EtlJob(SimpleAvroReader(spark), SimpleAvroWriter())
 
     // When
-    etlJob.transform(sourceDir.toString, destDir.toString)
+    etlJob.run(sourceDir.toString, destDir.toString)
 
     // Then
     val df = localSparkSession.read.format("com.databricks.spark.avro").load(destDir.toString)
-    val actualRows: Array[Row] = df.sort("description").collect
+    val actualRows = df.sort("description").collect
 
     val expectedRows = Array(
       Row("thing-1", 1, "comment-1"),
@@ -98,7 +98,7 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
     val sourceDir = Files.createDirectory(Paths.get(testDir.toString, "source"))
     val destDir = Files.createDirectory(Paths.get(testDir.toString, "dest"))
 
-    val testDf: DataFrame = createTestDataFrame(spark)
+    val testDf = createTestDataFrame(spark)
     testDf.write
       .format("com.databricks.spark.avro")
       .mode(SaveMode.Overwrite)
@@ -109,14 +109,14 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
       StructField("numThings", IntegerType, nullable = true)
     ))
 
-    val etlJob:EtlJob = new EtlJob(SimpleAvroReader(spark).withSchema(schema), SimpleAvroWriter())
+    val etlJob = EtlJob(SimpleAvroReader(spark).withSchema(schema), SimpleAvroWriter())
 
     // When
-    etlJob.transform(sourceDir.toString, destDir.toString)
+    etlJob.run(sourceDir.toString, destDir.toString)
 
     // Then
     val df = localSparkSession.read.format("com.databricks.spark.avro").load(destDir.toString)
-    val actualRows: Array[Row] = df.sort("description").collect
+    val actualRows = df.sort("description").collect
 
     val expectedRows = Array(
       Row("thing-1", 1),
@@ -136,12 +136,10 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
     /*
     TODO
     - overwrite existing data
+    - re-partitioner for writer
+      - SparkWriter optionally to handle re-partitioning etc: DataSetWriter.withPartitionCalculator(...)
     - Copier?
     - reads multiple paths? don't think so
-    - Split into
-        DataSetReader that different file formats
-        DataSetWriter that optionally handles re-partitioning etc: DataSetWriter.withPartitionCalculator(...) and different file formats
-        DataSetMover
      */
     fail("TODO")
   }

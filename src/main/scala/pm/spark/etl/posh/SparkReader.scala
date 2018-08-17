@@ -3,10 +3,10 @@ package pm.spark.etl.posh
 import org.apache.spark.sql.types.StructType
 import org.apache.spark.sql.{DataFrame, DataFrameReader, SparkSession}
 
-class EtlReader(sparkPathToFrame: (SparkSession, String, Option[StructType]) => DataFrame, spark: SparkSession) {
+class SparkReader(sparkPathToFrame: (SparkSession, String, Option[StructType]) => DataFrame, spark: SparkSession) {
   var schema: Option[StructType] = None
 
-  def withSchema(schema: StructType): EtlReader = {
+  def withSchema(schema: StructType): SparkReader = {
     this.schema = Option(schema)
     this
   }
@@ -19,7 +19,7 @@ object SimpleAvroReader {
     BasicDataFrameReader(spark, schema).format("com.databricks.spark.avro").load(path)
   }
 
-  def apply(spark: SparkSession): EtlReader = new EtlReader(sparkPathToFrame, spark)
+  def apply(spark: SparkSession): SparkReader = new SparkReader(sparkPathToFrame, spark)
 }
 
 object SimpleJsonReader {
@@ -27,7 +27,7 @@ object SimpleJsonReader {
     BasicDataFrameReader(spark, schema).json(path)
   }
 
-  def apply(spark: SparkSession): EtlReader = new EtlReader(sparkPathToFrame, spark)
+  def apply(spark: SparkSession): SparkReader = new SparkReader(sparkPathToFrame, spark)
 }
 
 object BasicDataFrameReader {
