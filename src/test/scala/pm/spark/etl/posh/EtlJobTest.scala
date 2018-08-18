@@ -12,7 +12,7 @@ import pm.spark.utils.LocalSparkSession
 
 class EtlJobTest extends FunSpec with LocalSparkSession {
 
-  it("replaces an Avro data set with a transformed data set") {
+  it("transforms an Avro data set") {
 
     // Given
     val spark = localSparkSession
@@ -135,8 +135,9 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
   it("TODO: has not been done yet") {
     /*
     TODO
-    - re-partitioner for writer
+    - re-partitioner for writer - no - have pre-write transformer instead
       - SparkWriter optionally to handle re-partitioning etc: DataSetWriter.withPartitionCalculator(...)
+    - Not sure about identity() as default transformer
     - Copier?
     - reads multiple paths? don't think so
      */
