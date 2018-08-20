@@ -1,13 +1,12 @@
 package pm.spark.etl.posh
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Files, Paths}
 
 import org.apache.commons.io.FileUtils
-import org.apache.spark.sql.{DataFrame, Row, SaveMode, SparkSession}
 import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
+import org.apache.spark.sql.{DataFrame, Row, SaveMode, SparkSession}
 import org.scalatest.FunSpec
-import pm.spark.etl.replace.DataSetTransformer
 import pm.spark.utils.LocalSparkSession
 
 class EtlJobTest extends FunSpec with LocalSparkSession {
@@ -26,11 +25,7 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
       .mode(SaveMode.Overwrite)
       .save(sourceDir.toString)
 
-    def withNewColumn()(df: DataFrame): DataFrame = {
-      df.withColumn("newColumn", lit("new column"))
-    }
-
-    val etlJob:EtlJob = EtlJob(SimpleAvroReader(spark), SimpleAvroWriter()).withTransformer(withNewColumn())
+    val etlJob:EtlJob = EtlJob(SimpleAvroReader(spark), SimpleAvroWriter()).withTransformer(new NewColumnTransformer())
 
     // When
     etlJob.run(sourceDir.toString, destDir.toString)
@@ -137,7 +132,7 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
     TODO
     - re-partitioner for writer - no - have pre-write transformer instead
       - SparkWriter optionally to handle re-partitioning etc: DataSetWriter.withPartitionCalculator(...)
-    - Not sure about identity() as default transformer
+    - refactor tests to remove repeated code
     - Copier?
     - reads multiple paths? don't think so
      */
@@ -160,5 +155,9 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
     )
 
     spark.createDataFrame(spark.sparkContext.parallelize(testRows), testSchema)
+  }
+
+  private class NewColumnTransformer extends DataFrameTransformer {
+    def transform(df: DataFrame): DataFrame = df.withColumn("newColumn", lit("new column"))
   }
 }

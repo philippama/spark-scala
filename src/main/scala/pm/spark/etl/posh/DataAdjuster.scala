@@ -4,20 +4,18 @@ import org.apache.spark.sql.{DataFrame, SparkSession}
 
 class DataAdjuster(reader: SparkReader, writer: SparkWriter, tempDataWriter: SparkWriter, tempDataReader: SparkReader) {
 
-  private var postReadTransformer: DataFrame => DataFrame = identity()
-  private var preWriteTransformer: DataFrame => DataFrame = identity()
+  private var postReadTransformer: DataFrameTransformer = IdentityTransformer()
+  private var preWriteTransformer: DataFrameTransformer = IdentityTransformer()
 
-  def withPostReadTransformer(transformer: DataFrame => DataFrame): DataAdjuster = {
+  def withPostReadTransformer(transformer: DataFrameTransformer): DataAdjuster = {
     this.postReadTransformer = transformer
     this
   }
 
-  def withPreWriteTransformer(transformer: DataFrame => DataFrame): DataAdjuster = {
+  def withPreWriteTransformer(transformer: DataFrameTransformer): DataAdjuster = {
     this.preWriteTransformer = transformer
     this
   }
-
-  def identity()(df: DataFrame): DataFrame = df
 
   def run(sourcePath: String, tempPath: String): Unit = {
     EtlJob(reader, tempDataWriter).withTransformer(postReadTransformer).run(sourcePath, tempPath)

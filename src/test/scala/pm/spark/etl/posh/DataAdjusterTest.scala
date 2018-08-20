@@ -103,12 +103,8 @@ class DataAdjusterTest extends FunSpec with LocalSparkSession {
       .mode(SaveMode.Overwrite)
       .save(sourceDir.toString)
 
-    def withNewColumn()(df: DataFrame): DataFrame = {
-      df.withColumn("newColumn", lit("new column"))
-    }
-
     val dataAdjuster = DataAdjuster(spark, SimpleAvroReader(spark), SimpleAvroWriter())
-        .withPostReadTransformer(withNewColumn())
+        .withPostReadTransformer(new NewColumnTransformer())
 
     // When
     dataAdjuster.run(sourceDir.toString, tempDir.toString)
@@ -149,12 +145,8 @@ class DataAdjusterTest extends FunSpec with LocalSparkSession {
       .mode(SaveMode.Overwrite)
       .save(sourceDir.toString)
 
-    def withNewColumn()(df: DataFrame): DataFrame = {
-      df.withColumn("newColumn", lit("new column"))
-    }
-
     val dataAdjuster = DataAdjuster(spark, SimpleAvroReader(spark), SimpleAvroWriter())
-      .withPreWriteTransformer(withNewColumn())
+      .withPreWriteTransformer(new NewColumnTransformer())
 
     // When
     dataAdjuster.run(sourceDir.toString, tempDir.toString)
@@ -203,5 +195,9 @@ class DataAdjusterTest extends FunSpec with LocalSparkSession {
     )
 
     spark.createDataFrame(spark.sparkContext.parallelize(testRows), testSchema)
+  }
+
+  private class NewColumnTransformer extends DataFrameTransformer {
+    def transform(df: DataFrame): DataFrame = df.withColumn("newColumn", lit("new column"))
   }
 }
