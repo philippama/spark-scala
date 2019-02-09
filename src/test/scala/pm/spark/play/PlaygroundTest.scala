@@ -1,20 +1,21 @@
 package pm.spark.play
 
+import org.apache
+import org.apache.spark
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.apache.spark.sql.functions.max
 import org.apache.spark.sql.types._
 import org.scalatest.FunSpec
+import pm.spark.LocalSpark
 
 case class TestClass(description: String, numThings: Int)
 
-class PlayTest extends FunSpec {
+class PlayTest extends FunSpec with LocalSpark {
 
   describe("does something") {
     it("playground for experimenting") {
 
       // Given
-      val spark = localSparkSession
-
       val testDf: DataFrame = createTestDataFrame(spark)
 
       // When
@@ -28,8 +29,6 @@ class PlayTest extends FunSpec {
     it("empty DataFrame") {
 
       // Given
-      val spark = localSparkSession
-
       val df: DataFrame = spark.emptyDataFrame
 
       // When
@@ -43,8 +42,6 @@ class PlayTest extends FunSpec {
 
     it("extracts value from row with filter using Spark SQL") {
       // Given
-      val spark = localSparkSession
-
       val testDf: DataFrame = createTestDataFrame(spark)
 
       // When
@@ -61,8 +58,6 @@ class PlayTest extends FunSpec {
 
     it("extracts value from row with filter using implicits") {
       // Given
-      val spark = localSparkSession
-
       val testDf: DataFrame = createTestDataFrame(spark)
 
       // When
@@ -79,8 +74,6 @@ class PlayTest extends FunSpec {
 
     it("selects array of columns") {
       // Given
-      val spark = localSparkSession
-
       val testDf: DataFrame = createTestDataFrame(spark)
       val columns = Array("description", "comment")
 
@@ -103,17 +96,6 @@ class PlayTest extends FunSpec {
       spark.stop()
     }
 
-  }
-
-//TODO : refactor out a trait for this - or use SharedSparkContext from spark-testing-base?
-  private def localSparkSession = {
-    SparkSession
-      .builder()
-      .appName("test")
-      .master("local[*]")
-      .config("spark.driver.host", "localhost")
-      .config("spark.driver.port", 7077)
-      .getOrCreate()
   }
 
   private def createTestDataFrame(spark: SparkSession) = {
