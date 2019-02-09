@@ -160,4 +160,8 @@ class EtlJobTest extends FunSpec with LocalSparkSession {
   private class NewColumnTransformer extends DataFrameTransformer {
     def transform(df: DataFrame): DataFrame = df.withColumn("newColumn", lit("new column"))
   }
+
+  private class Repartitioner(numPartitions: Int) extends DataFrameTransformer {
+    def transform(df: DataFrame): DataFrame = df.coalesce(numPartitions)
+  }
 }
