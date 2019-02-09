@@ -1,16 +1,11 @@
 package pm.spark.play
 
-import org.apache
-import org.apache.spark
-import org.apache.spark.sql.{DataFrame, Row, SparkSession}
-import org.apache.spark.sql.functions.max
 import org.apache.spark.sql.types._
+import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 import org.scalatest.FunSpec
 import pm.spark.LocalSpark
 
-case class TestClass(description: String, numThings: Int)
-
-class PlayTest extends FunSpec with LocalSpark {
+class PlaygroundTest extends FunSpec with LocalSpark {
 
   describe("does something") {
     it("playground for experimenting") {
@@ -23,7 +18,6 @@ class PlayTest extends FunSpec with LocalSpark {
 
       // Then
 
-      spark.stop()
     }
 
     it("empty DataFrame") {
@@ -36,8 +30,6 @@ class PlayTest extends FunSpec with LocalSpark {
 
       // Then
       assertResult(true)(isEmpty)
-
-      spark.stop()
     }
 
     it("extracts value from row with filter using Spark SQL") {
@@ -45,15 +37,12 @@ class PlayTest extends FunSpec with LocalSpark {
       val testDf: DataFrame = createTestDataFrame(spark)
 
       // When
-      import spark.implicits._
       val result = testDf.filter("description = 'thing-2'")
           .first()
           .getString(0)
 
       // Then
       assertResult("thing-2")(result)
-
-      spark.stop()
     }
 
     it("extracts value from row with filter using implicits") {
@@ -68,8 +57,6 @@ class PlayTest extends FunSpec with LocalSpark {
 
       // Then
       assertResult("thing-2")(result)
-
-      spark.stop()
     }
 
     it("selects array of columns") {
@@ -92,8 +79,6 @@ class PlayTest extends FunSpec with LocalSpark {
         Row("thing-5", "comment-5")
       )
       assertResult(expectedRows)(actualRows)
-
-      spark.stop()
     }
 
   }
