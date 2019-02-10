@@ -7,17 +7,23 @@ import org.apache.spark.sql.types._
 class StructTypeToCaseClass(schema: StructType, className: String) {
 
   private val classCount = new AtomicInteger(1)
+  private var generatedCaseClasses = Seq[String]()
 
-  def buildCaseClassString: String = buildCaseClassString(schema, className)
+  def buildCaseClassString: String = {
+    generateCaseClassString(schema, className)
+    val caseClassString = generatedCaseClasses.mkString("\n")
+    println("Generated case class(es):")
+    println(caseClassString)
+    caseClassString
+  }
 
-  private def buildCaseClassString(structType: StructType, classBaseName: String): String = {
+  private def generateCaseClassString(structType: StructType, classBaseName: String): Unit = {
     val fields = structType.fields.map(field => {
       s"${field.name}: ${dataTypeToClass(field.dataType)}"
     })
 
     val caseClassString = fields.mkString(s"case class $classBaseName(", ", ", ")")
-    println(s"Generated: [$caseClassString]")
-    caseClassString
+    generatedCaseClasses = generatedCaseClasses :+ caseClassString
   }
 
   private def dataTypeToClass(dataType: DataType): String = {
@@ -44,10 +50,9 @@ class StructTypeToCaseClass(schema: StructType, className: String) {
 
   private def buildStructType(field: StructType): String = {
     val newClassName = s"$className${classCount.getAndIncrement}"
-    buildCaseClassString(field, newClassName)
+    generateCaseClassString(field, newClassName)
     newClassName
   }
-
 }
 
 object StructTypeToCaseClass{

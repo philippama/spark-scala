@@ -116,11 +116,19 @@ class StructTypeToCaseClassSpec extends FunSpec {
       val actual = StructTypeToCaseClass(complexSchema).buildCaseClassString
 
       val expected =
-        "case class GeneratedClass(" +
-        "name: String, " +
-        "testClass: GeneratedClass1, " +
-        "testClasses: Seq[GeneratedClass2]" +
-        ")"
+              "case class GeneratedClass1(" +
+              "aString: String, " +
+              "anInteger: Int" +
+              ")" + "\n" +
+              "case class GeneratedClass2(" +
+              "aString: String, " +
+              "anInteger: Int" +
+              ")" + "\n" +
+              "case class GeneratedClass(" +
+              "name: String, " +
+              "testClass: GeneratedClass1, " +
+              "testClasses: Seq[GeneratedClass2]" +
+              ")"
 
       assert(actual == expected)
     }
