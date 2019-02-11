@@ -6,6 +6,7 @@ import org.apache.spark.sql.types._
 
 class StructTypeToCaseClass(schema: StructType, className: String) {
 
+  //TODO: Don't be mutating!
   private val classCount = new AtomicInteger(1)
   private var generatedCaseClasses = Seq[String]()
 
@@ -19,15 +20,15 @@ class StructTypeToCaseClass(schema: StructType, className: String) {
 
   private def generateCaseClassString(structType: StructType, classBaseName: String): Unit = {
     val fields = structType.fields.map(field => {
-      s"${field.name}: ${dataTypeToClass(field.dataType)}"
+      s"${field.name}: ${dataTypeToClass(field.dataType, field.nullable)}"
     })
 
     val caseClassString = fields.mkString(s"case class $classBaseName(", ", ", ")")
     generatedCaseClasses = generatedCaseClasses :+ caseClassString
   }
 
-  private def dataTypeToClass(dataType: DataType): String = {
-    dataType match {
+  private def dataTypeToClass(dataType: DataType, isNullable: Boolean): String = {
+    val dataTypeString = dataType match {
       case _: ByteType => "Byte"
       case _: ShortType => "Short"
       case _: IntegerType => "Int"
@@ -38,14 +39,24 @@ class StructTypeToCaseClass(schema: StructType, className: String) {
       case _: BooleanType => "Boolean"
       case _: TimestampType => "java.sql.Timestamp"
       case _: DateType => "java.sql.Date"
-      case d: ArrayType => buildArrayType(d)
       case d: StructType => buildStructType(d)
+      case d: ArrayType => buildArrayType(d)
       case t => throw new UnsupportedOperationException(s"DataType [$t] is not supported")
+    }
+    optionIfNullable(dataTypeString, isNullable)
+  }
+
+  private def optionIfNullable(dataType: String, isNullable: Boolean) = {
+    if (isNullable) {
+      s"Option[$dataType]"
+    }
+    else {
+      dataType
     }
   }
 
   private def buildArrayType(field: ArrayType) = {
-    s"Seq[${dataTypeToClass(field.elementType)}]"
+    s"Seq[${dataTypeToClass(field.elementType, field.containsNull)}]"
   }
 
   private def buildStructType(field: StructType): String = {
